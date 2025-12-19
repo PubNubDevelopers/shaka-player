@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/PubNubDevelopers/shaka-player/compare/v5.0.0...v5.0.1) (2025-12-19)
+
+
+### Bug Fixes
+
+* correct package name. ([2a6ed32](https://github.com/PubNubDevelopers/shaka-player/commit/2a6ed323cf597c49080e416227540e2da5505735))
+
 ## [5.0.0](https://github.com/PubNubDevelopers/shaka-player/compare/v4.16.0...v5.0.0) (2025-12-19)
 
 
