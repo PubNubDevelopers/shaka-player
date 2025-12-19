@@ -1,0 +1,15 @@
+*.pyc
+*~
+node_modules
+dist/
+docs/api/
+coverage/
+.DS_Store
+.vscode
+.babel-cache
+.idea/
+
+# Local config files (for PubNub keys, etc.)
+*.local.js
+.env
+.env.local
