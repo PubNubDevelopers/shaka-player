@@ -381,6 +381,88 @@ NOTES:
     access to the video pixels for transformation.
 
 
+## Playback Sync (Watch Party)
+
+Shaka Player supports real-time playback synchronization across multiple clients
+using [PubNub][] as the messaging layer. This enables "watch party" experiences
+where multiple viewers can watch video together with synchronized play, pause,
+and seek actions.
+
+### Features
+
+- **Master/Follower Model**: One client controls playback (master), others follow
+- **Real-time Sync**: Play, pause, seek, and playback rate changes sync instantly
+- **Automatic Drift Correction**: Periodic sync pulses keep all clients aligned
+- **Latency Compensation**: Network latency is accounted for in time synchronization
+- **Presence Events**: Know when users join or leave the sync room
+
+### Getting PubNub Keys
+
+1. Create a free account at [admin.pubnub.com](https://admin.pubnub.com)
+2. Create a new app in your PubNub dashboard
+3. Navigate to the "Keyset" section of your app
+4. Copy your **Publish Key** and **Subscribe Key**
+
+### Quick Start
+
+```javascript
+// Include PubNub SDK (required)
+// <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.0.0.min.js"></script>
+
+// Create player and load content
+const player = new shaka.Player();
+await player.attach(videoElement);
+await player.load('https://example.com/manifest.mpd');
+
+// Create SyncManager with your PubNub keys
+const syncManager = new shaka.sync.SyncManager(player, {
+  publishKey: 'pub-c-your-publish-key',
+  subscribeKey: 'sub-c-your-subscribe-key',
+  userId: 'optional-user-id',           // Auto-generated if not provided
+  maxDriftThreshold: 0.5,               // Seconds (default: 0.5)
+  syncIntervalMs: 5000                  // Milliseconds (default: 5000)
+});
+
+// Connect to a sync room
+syncManager.connect('my-watch-party');
+
+// Become the master to control playback for everyone
+syncManager.becomeMaster();
+
+// Or stay as follower to receive sync commands
+syncManager.becomeFollower();
+```
+
+### SyncManager API
+
+| Method | Description |
+|--------|-------------|
+| `connect(roomId)` | Join a sync room by ID |
+| `disconnect()` | Leave the current sync room |
+| `becomeMaster()` | Take control of playback for all clients |
+| `becomeFollower()` | Receive and apply sync commands |
+| `getRole()` | Returns `'master'` or `'follower'` |
+| `isConnected()` | Returns connection status |
+| `getRoomId()` | Returns current room ID |
+| `getUserId()` | Returns this client's user ID |
+| `destroy()` | Clean up all resources |
+
+### Events
+
+```javascript
+// Fired when another client claims master role
+syncManager.addEventListener('masterchanged', (event) => {
+  console.log('New master:', event.newMasterId);
+});
+```
+
+### Demo
+
+Try the [Playback Sync Demo](demo/sync/) to see it in action.
+
+[PubNub]: https://www.pubnub.com/
+
+
 ## Builds
 
 Shaka currently provides the following versions:
