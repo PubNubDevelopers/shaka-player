@@ -22,6 +22,14 @@
       "email": "tykus160@gmail.com"
     }
   ],
+  "peerDependencies": {
+    "pubnub": ">=10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "pubnub": {
+      "optional": false
+    }
+  },
   "devDependencies": {
     "@babel/core": "^7.17.5",
     "@babel/polyfill": "^7.12.1",
