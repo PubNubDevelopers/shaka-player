@@ -165,6 +165,7 @@ unregisters
 unstore
 masterchanged
 userjoined
+userleft
 userjoinedunviewed
 vint
 vints
