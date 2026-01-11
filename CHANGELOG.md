@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/PubNubDevelopers/shaka-player/compare/v5.0.1...v5.1.0) (2026-01-11)
+
+
+### Features
+
+* add pubnub as peer dependency ([8deee77](https://github.com/PubNubDevelopers/shaka-player/commit/8deee778d855c7e314433dbbd42ee97098fbeb0a))
+
 ## [5.0.1](https://github.com/PubNubDevelopers/shaka-player/compare/v5.0.0...v5.0.1) (2026-01-06)
 
 
