@@ -230,7 +230,7 @@ Apache 2.0 - See [LICENSE](LICENSE)
 **Powered by [PubNub](https://www.pubnub.com)**
 
 <a href="https://www.pubnub.com">
-  <img src="https://www.pubnub.com/wp-content/uploads/2024/12/PubNub_Logo_RGB_Flame.svg" alt="PubNub" height="50">
+  <img src="assets/pn-logo.png" alt="PubNub" height="50">
 </a>
 
 <br><br>
