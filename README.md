@@ -1,549 +1,287 @@
-<h1>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/logos/shaka-player-logo-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="docs/logos/shaka-player-logo-light.png">
-    <img alt="Kinetoscope Logo" src="docs/logos/shaka-player-logo-light.png">
-  </picture>
-</h1>
-
-Shaka Player is an open-source JavaScript library for adaptive media.  It plays
-adaptive media formats (such as [DASH][] and [HLS][]) in a browser,
-without using plugins or Flash.  Instead, Shaka Player uses the open web
-standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
-
-Shaka Player also supports [offline storage and playback][] of media using
-[IndexedDB][].  Content can be stored on any browser.  Storage of licenses
-depends on browser support.
-
-Our main goal is to make it as easy as possible to stream adaptive bitrate
-video and audio using modern browser technologies. We try to keep the library
-light, simple, and free from third-party dependencies. Everything you need to
-build and deploy is in the sources.
-
-For details on what's coming next, see our [development roadmap](roadmap.md).
-
-[DASH]: http://dashif.org/
-[HLS]: https://developer.apple.com/streaming/
-[MediaSource Extensions]: https://www.w3.org/TR/media-source/
-[Encrypted Media Extensions]: https://www.w3.org/TR/encrypted-media/
-[IndexedDB]: https://www.w3.org/TR/IndexedDB-2/
-[offline storage and playback]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-offline.html
-
-
-## Maintained branches
-
-See [maintained-branches.md](https://github.com/shaka-project/shaka-player/blob/main/maintained-branches.md)
-for the up-to-date list of maintained branches of Shaka Player.
-
-
-## Platform and browser support matrix
-
-|Browser       |Windows   |Mac      |Linux    |Android  |iOS >= 9  |iOS >= 17.1|iPadOS >= 13|ChromeOS|Other|
-|:------------:|:--------:|:-------:|:-------:|:-------:|:--------:|:---------:|:----------:|:------:|:---:|
-|Chrome        |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Native** |**Native**  |**Y**   | -   |
-|Firefox       |**Y**     |**Y**    |**Y**    |untested⁵|**Native**|**Native** |**Native**  | -      | -   |
-|Edge          |**Y**     | -       | -       | -       | -        | -         | -          | -      | -   |
-|Edge Chromium |**Y**     |**Y**    |**Y**    |untested⁵|**Native**|**Native** |**Native**  | -      | -   |
-|IE            | N        | -       | -       | -       | -        | -         | -          | -      | -   |
-|Safari        | -        |**Y**    | -       | -       |**Native**|**Y**      |**Y**       | -      | -   |
-|Opera         |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -         | -          | -      | -   |
-|Chromecast²   | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|Tizen TV³     | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|WebOS⁶        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|Hisense⁷      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|Vizio⁷        | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|Xbox One      | -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|Playstation 4⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-|Playstation 5⁷| -        | -       | -       | -       | -        | -         | -          | -      |**Y**|
-
-NOTES:
- - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
-   can be implemented with Shaka Player.
- - ³: Tizen 2017 model is actively tested and supported by the Shaka Player
-   team. Tizen 2016 model is community-supported and untested by us.
- - ⁵: These are expected to work, but are not actively tested by the Shaka
-   Player team.
- - ⁶: These are expected to work, but are community-supported and untested by
-   us.
-     - Official support for LG WebOS TV:
-       https://github.com/shaka-project/shaka-player/issues/1330
- - ⁷: These are expected to work, but are community-supported and untested by
-   us.
-
-NOTES for iOS and iPadOS:
- - We support iOS 9+ through Apple's native HLS player.  We provide the same
-   top-level API, but we just set the video's `src` element to the manifest/media.
-   So we are dependent on the browser supporting the manifests.
- - Since iPadOS 13 [MediaSource Extensions][] is supported
- - Since iPadOS 17 and iOS 17.1 [ManagedMediaSource Extensions][] is supported
-
-[ManagedMediaSource Extensions]: https://www.w3.org/TR/media-source-2/#dom-managedmediasource
-
-## Manifest format support matrix
-
-|Format|Video On-Demand|Live |Event|In-Progress Recording|
-|:----:|:-------------:|:---:|:---:|:-------------------:|
-|DASH  |**Y**          |**Y**| -   |**Y**                |
-|HLS   |**Y**          |**Y**|**Y**| -                   |
-
-You can also create a [manifest parser plugin][] to support custom manifest
-formats.
-
-[manifest parser plugin]: https://shaka-project.github.io/shaka-player/docs/api/tutorial-manifest-parser.html
-
-
-## DASH features
-
-DASH features supported:
- - VOD, Live, and In-Progress Recordings (dynamic VOD content)
- - MPD@timeShiftBufferDepth for seeking backward in Live streams
- - Multi-period content (static and dynamic)
- - Xlink elements (actuate=onLoad only, resolve-to-zero, fallback content)
- - All forms of segment index info: SegmentBase@indexRange, SegmentTimeline,
-   SegmentTemplate@duration, SegmentTemplate@index, SegmentList
- - Multi-codec/multi-container manifests (we will negotiate support with the
-   browser and choose the best ones)
- - Encrypted content (including custom ContentProtection schemas, PSSH in the
-   manifest)
- - Key rotation
- - Trick mode tracks
- - WebVTT and TTML
- - CEA-608/708 captions
- - Multi-codec variants (on platforms with changeType support)
- - MPD chaining
- - MPD Patch updates for SegmentTemplate with $Number$, SegmentTimeline with
-   $Number$ and SegmentTimeline with $Time$
-
-DASH features **not** supported:
- - Xlink with actuate=onRequest
- - Manifests without any segment info:
-   https://github.com/shaka-project/shaka-player/issues/1088
- - Multiple trick mode tracks for the same resolution at varying framerates or
-   bitrates
- - Timescales so large that timestamps cannot be represented as integers in
-   JavaScript (2^53): https://github.com/shaka-project/shaka-player/issues/1667
- - Modifying elements with an @schemeIdUri attribute via MPD Patch
- - Xlink dereferencing with MPD Patch
-
-
-## HLS features
-
-HLS features supported:
- - VOD, Live, and Event types
- - Low-latency streaming with partial segments, preload hints, delta updates and
-   blocking playlist reload
- - Discontinuity
- - ISO-BMFF / MP4 / CMAF support
- - MPEG-2 TS support
- - WebVTT and TTML
- - CEA-608/708 captions
- - Encrypted content with PlayReady, Widevine and WisePlay
- - Encrypted content with FairPlay (Safari on macOS and iOS only)
- - AES-128, AES-256 and AES-256-CTR support on browsers with Web Crypto API support
- - SAMPLE-AES and SAMPLE-AES-CTR (identity) support on browsers with ClearKey support
- - Key rotation
- - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
- - I-frame-only playlists (for trick play and thumbnails)
- - #EXT-X-IMAGE-STREAM-INF for thumbnails
- - Interstitials
- - Container change during the playback (eg: MP4 to TS, or AAC to TS)
- - Chapters (`#EXT-X-SESSION-DATA` tag with the ID `com.apple.hls.chapters`)
-
-HLS features **not** supported:
- - X-SNAP attribute in interstitials
-
-<details>
-<summary>
-<h3>Supported HLS tags</h3>
-</summary>
-
-For details on the HLS format and these tags' meanings, see https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis
-
-<h4> Multivariant Playlist tags</h4>
-
-- `#EXT-X-STREAM-INF:<attribute-list>`
-  `<URI>`
-- `#EXT-X-MEDIA:<attribute-list>`
-- `#EXT-X-IMAGE-STREAM-INF:<attribute-list>`
-- `#EXT-X-I-FRAME-STREAM-INF:<attribute-list>`
-- `#EXT-X-SESSION-DATA:<attribute-list>`
-- `#EXT-X-SESSION-KEY:<attribute-list>` EME Key-System selection and preloading
-- `#EXT-X-START:TIME-OFFSET=<n>`
-- `#EXT-X-CONTENT-STEERING:<attribute-list>` Content Steering
-- `#EXT-X-DEFINE:<attribute-list>` Variable Substitution (`NAME,VALUE,QUERYPARAM` attributes)
-
-<h4>Media Playlist tags</h4>
-
-- `#EXTM3U`
-- `#EXTINF:<duration>,[<title>]`
-- `#EXT-X-PLAYLIST-TYPE:<type`
-- `#EXT-X-ENDLIST`
-- `#EXT-X-MEDIA-SEQUENCE=<n>`
-- `#EXT-X-TARGETDURATION=<n>`
-- `#EXT-X-DISCONTINUITY`
-- `#EXT-X-DISCONTINUITY-SEQUENCE=<n>`
-- `#EXT-X-BYTERANGE=<n>[@<o>]`
-- `#EXT-X-MAP:<attribute-list>`
-- `#EXT-X-KEY:<attribute-list>` (`KEYFORMAT="identity",METHOD=SAMPLE-AES` is only supports with MP4 segments)
-- `#EXT-X-PROGRAM-DATE-TIME:<attribute-list>`
-- `#EXT-X-START:TIME-OFFSET=<n>`
-- `#EXT-X-SERVER-CONTROL:<attribute-list>`
-- `#EXT-X-PART-INF:PART-TARGET=<n>`
-- `#EXT-X-PART:<attribute-list>`
-- `#EXT-X-SKIP:<attribute-list>` Delta Playlists
-- `#EXT-X-DATERANGE:<attribute-list>` Metadata
-- `#EXT-X-DEFINE:<attribute-list>` Variable Import and Substitution (`NAME,VALUE,IMPORT,QUERYPARAM` attributes)
-- `#EXT-X-GAP`
-- `#EXT-X-PRELOAD-HINT:<attribute-list>`
-- `#EXT-X-BITRATE`
-
-</details>
-
-
-## MPEG-5 Part2 LCEVC Support
-
-**Only supported on browsers with Media Source Extensions SourceBuffer support**
-
- - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dec.js][], must be
-   separately included)
-
- - Integration documentation : [docs](docs/design/current/lcevc-integration.md)
-
- - More on [MPEG-5 Part2 LCEVC][]
-
-[lcevc_dec.js]: https://www.npmjs.com/package/lcevc_dec.js
-[MPEG-5 Part2 LCEVC]: https://www.lcevc.org
-
-
-## DRM support matrix
-
-|Browser       |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey⁶ |
-|:------------:|:--------:|:-------:|:-------:|:-------:|:--------:|
-|Chrome¹       |**Y**     | -       | -       | -       |**Y**     |
-|Firefox²      |**Y**     | -       | -       | -       |**Y**     |
-|Edge³         | -        |**Y**    | -       | -       | -        |
-|Edge Chromium |**Y**     |**Y**    | -       | -       |**Y**     |
-|Safari        | -        | -       |**Y**    | -       | -        |
-|Opera         |**Y**     | -       | -       | -       |**Y**     |
-|Chromecast    |**Y**     |**Y**    | -       | -       |**Y**     |
-|Tizen TV      |**Y**     |**Y**    | -       | -       |**Y**     |
-|WebOS⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
-|Hisense⁷      |untested⁷ |untested⁷| -       | -       |untested⁷ |
-|Vizio⁷        |untested⁷ |untested⁷| -       | -       |untested⁷ |
-|Xbox One      | -        |**Y**    | -       | -       | -        |
-|Playstation 4⁷| -        |untested⁷| -       | -       |untested⁷ |
-|Playstation 5⁷| -        |untested⁷| -       | -       |untested⁷ |
-|Huawei⁷       | -        | -       | -       |untested⁷|untested⁷ |
-
-Other DRM systems should work out of the box if they are interoperable and
-compliant to the EME spec.
-
-NOTES:
- - ¹: Only official Chrome builds contain the Widevine CDM.  Chromium built from
-   source does not support DRM.
- - ²: DRM must be enabled by the user.  The first time a Firefox user visits a
-   site with encrypted media, the user will be prompted to enable DRM.
- - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
- - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
-   content security.
- - ⁷: These are expected to work, but are community-supported and untested by
-   us.
-
-|Manifest  |Widevine  |PlayReady|FairPlay |WisePlay |ClearKey  |
-|:--------:|:--------:|:-------:|:-------:|:-------:|:--------:|
-|DASH      |**Y**     |**Y**    |**Y**    |**Y**    |**Y**     |
-|HLS       |**Y**     |**Y**    |**Y** ¹  |**Y**    |**Y**     |
-
-NOTES:
- - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
-   Safari. We do support FairPlay through MSE/EME, however. See the
-   `streaming.useNativeHlsForFairPlay` configuration value.
-
-
-## Media container and subtitle support
-
-Shaka Player supports:
-  - ISO-BMFF / CMAF / MP4
-    - Depends on browser support for the container via MediaSource
-    - Can parse "sidx" box for DASH's SegmentBase@indexRange and
-      SegmentTemplate@index
-    - Can find and parse "tfdt" box to find segment start time in HLS
-  - WebM
-    - Depends on browser support for the container via MediaSource
-    - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and
-      SegmentTemplate@index
-    - Not supported in HLS
-  - MPEG-2 TS
-    - Can be played on any browser which supports MP4
-    - Can find and parse timestamps to find segment start time in HLS
-  - WebVTT
-    - Supported in both text form and embedded in MP4
-  - TTML
-    - Supported in both XML form and embedded in MP4
-  - CEA-608
-    - Supported embedded in MP4 and TS
-  - CEA-708
-    - Supported embedded in MP4 and TS
-  - Raw AAC
-    - Supported in raw AAC container and transmuxing to AAC in MP4 container
-      (depends on browser support via MediaSource).
-  - Raw MP3
-    - Supported in raw MP3 container and transmuxing to MP3 in MP4 container
-      (depends on browser support via MediaSource).
-  - Raw AC-3
-    - Supported in raw AC-3 container and transmuxing to AC-3 in MP4 container
-      (depends on browser support via MediaSource).
-  - Raw EC-3
-    - Supported in raw EC-3 container and transmuxing to EC-3 in MP4 container
-      (depends on browser support via MediaSource).
-  - SubRip (SRT)
-    - UTF-8 encoding only
-
-Subtitles are rendered by the browser by default. Applications can create a
-[text display plugin][] for customer rendering to go beyond browser-supported
-attributes.
-
-[cueing data]: https://www.webmproject.org/docs/container/#cueing-data
-[text display plugin]: https://shaka-project.github.io/shaka-player/docs/api/shaka.extern.TextDisplayer.html
-<!-- TODO: replace with a link to a TextDisplayer tutorial -->
-
-
-## Transmuxer support
-
-Shaka Player supports:
-  - Raw AAC to AAC in MP4
-  - Raw MP3 to MP3 in MP4
-  - Raw AC-3 to AC-3 in MP4
-  - Raw EC-3 to EC-3 in MP4
-  - AAC in MPEG-2 TS to AAC in MP4
-  - AC-3 in MPEG-2 TS to AC-3 in MP4
-  - EC-3 in MPEG-2 TS to EC-3 in MP4
-  - MP3 in MPEG-2 TS to MP3 in MP4
-  - MP3 in MPEG-2 TS to raw MP3
-  - Opus in MPEG-2 TS to MP3 in MP4
-  - H.264 in MPEG-2 TS to H.264 in MP4
-  - H.265 in MPEG-2 TS to H.265 in MP4
-  - Muxed content in MPEG-2 TS with the previous codecs
-
-
-## Thumbnails support
-
-Shaka Player supports:
-  - Internal DASH thumbnails. Using DASH-IF IOP Image Adaptation Set
-  - Internal HLS thumbnails. Using HLS Image Media Playlist
-  - Internal HLS thumbnails. Using I-frame-only playlists with mjpg codec
-  - External WebVTT with images/sprites (only for VoD)
-
-
-## Monetization with Ads
-
-Shaka Player supports:
-- IMA SDK for Client-Side Ad Insertion
-- IMA DAI SDK for Server-Side Ad Insertion
-- AWS MediaTailor for Client-Side
-- AWS MediaTailor for Server-Side
-- AWS MediaTailor overlays
-- HLS interstitials
-- DASH Media Presentation Insertion (MPD alternate)
-- Custom Interstitials
-- Basic support of VAST and VMAP without IMA
-- SVTA2053-2: Ad Creative Signaling in DASH and HLS
-
-
-## Content Steering support
-Shaka Player supports Content Steering (v1) in DASH and HLS.
-
-Content Steering features supported:
-- TTL, if missing, the default value is 300 seconds.
-- RELOAD-URI, if missing we use the url provided in the manifest as fallback.
-- PATHWAY-PRIORITY only HOST replacement
-
-Content Steering features **not** supported:
-- PATHWAY-CLONES other replacements than HOST.
-
-
-## VR support
-Shaka Player supports VR when:
-- Content is automatically treated as VR if it fits the following criteria:
-  - HLS or DASH manifest
-  - fMP4 segments
-  - Init segment contains `prji` and `hfov` boxes
-- Or, if it is manually enabled via the UI config.
-
-VR modes supported:
-- Equirectangular projection with 360 degrees of horizontal field of view.
-- Half equirectangular projection with 180 degrees of horizontal field of view.
-- Cubemap projection with 360 degrees of horizontal field of view.
-
-
-NOTES:
-  - VR is only supported for clear streams or HLS-AES stream. DRM prevents
-    access to the video pixels for transformation.
-
-
-## Playback Sync (Watch Party)
-
-Shaka Player supports real-time playback synchronization across multiple clients
-using [PubNub][] as the messaging layer. This enables "watch party" experiences
-where multiple viewers can watch video together with synchronized play, pause,
-and seek actions.
-
-### Features
-
-- **Master/Follower Model**: One client controls playback (master), others follow
-- **Real-time Sync**: Play, pause, seek, and playback rate changes sync instantly
-- **Automatic Drift Correction**: Periodic sync pulses keep all clients aligned
-- **Latency Compensation**: Network latency is accounted for in time synchronization
-- **Presence Events**: Know when users join or leave the sync room
-
-### Getting PubNub Keys
-
-1. Create a free account at [admin.pubnub.com](https://admin.pubnub.com)
-2. Create a new app in your PubNub dashboard
-3. Navigate to the "Keyset" section of your app
-4. Copy your **Publish Key** and **Subscribe Key**
-
-### Quick Start
+<div align="center">
+
+<!-- HERO BANNER - See description below for what to create -->
+<!-- Replace this placeholder with your custom banner image -->
+<img src="docs/logos/pubnub-shaka-hero.png" alt="PubNub + Shaka Player - Watch Party Video Streaming" width="100%">
+
+# @pubnub/shaka-player
+
+### Real-Time Synchronized Video Playback for the Web
+
+[![npm version](https://img.shields.io/npm/v/@pubnub/shaka-player?color=E11D48&label=npm&logo=npm)](https://www.npmjs.com/package/@pubnub/shaka-player)
+[![PubNub](https://img.shields.io/badge/Powered%20by-PubNub-E11D48?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiLz48L3N2Zz4=)](https://www.pubnub.com/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+---
+
+**🎬 Watch videos together in perfect sync across the globe**
+
+This is NOT the vanilla Shaka Player. This is a **PubNub-enhanced fork** that adds real-time playback synchronization, enabling "Watch Party" experiences where multiple viewers stay perfectly in sync.
+
+[Get Started](#-quick-start) · [Watch Party Demo](demo/sync/) · [API Reference](#-syncmanager-api) · [PubNub Dashboard](https://admin.pubnub.com)
+
+</div>
+
+---
+
+## 🆚 How is this different from Shaka Player?
+
+| Feature | Shaka Player | @pubnub/shaka-player |
+|---------|--------------|---------------------|
+| DASH/HLS Streaming | ✅ | ✅ |
+| DRM Support | ✅ | ✅ |
+| Offline Playback | ✅ | ✅ |
+| **Real-Time Sync (Watch Party)** | ❌ | ✅ **NEW** |
+| **Master/Follower Control** | ❌ | ✅ **NEW** |
+| **Automatic Drift Correction** | ❌ | ✅ **NEW** |
+| **Presence Events** | ❌ | ✅ **NEW** |
+
+> **Looking for vanilla Shaka Player?** → [shaka-player on npm](https://www.npmjs.com/package/shaka-player)
+
+---
+
+## ⚡ What Can You Build?
+
+<table>
+<tr>
+<td width="33%" align="center">
+
+### 🎉 Watch Parties
+Friends watching movies/shows together remotely
+
+</td>
+<td width="33%" align="center">
+
+### 🏟️ Live Events
+Synchronized viewing for sports, concerts, premieres
+
+</td>
+<td width="33%" align="center">
+
+### 🎓 E-Learning
+Instructors controlling video playback for classes
+
+</td>
+</tr>
+<tr>
+<td width="33%" align="center">
+
+### 💼 Corporate Training
+Synchronized training videos across offices
+
+</td>
+<td width="33%" align="center">
+
+### 🎮 Gaming Streams
+Synced esports viewing experiences
+
+</td>
+<td width="33%" align="center">
+
+### 🏥 Telehealth
+Doctors reviewing scans with patients in real-time
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install the package
+
+```bash
+npm install @pubnub/shaka-player pubnub
+```
+
+### 2. Get your PubNub keys (free)
+
+1. Create an account at **[admin.pubnub.com](https://admin.pubnub.com)**
+2. Create a new app → Get your **Publish Key** and **Subscribe Key**
+
+### 3. Start syncing!
 
 ```javascript
-// Include PubNub SDK (required)
-// <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.0.0.min.js"></script>
+import shaka from '@pubnub/shaka-player';
 
-// Create player and load content
+// Initialize player
+const video = document.getElementById('video');
 const player = new shaka.Player();
-await player.attach(videoElement);
+await player.attach(video);
 await player.load('https://example.com/manifest.mpd');
 
 // Create SyncManager with your PubNub keys
 const syncManager = new shaka.sync.SyncManager(player, {
-  publishKey: 'pub-c-your-publish-key',
-  subscribeKey: 'sub-c-your-subscribe-key',
-  userId: 'optional-user-id',           // Auto-generated if not provided
-  maxDriftThreshold: 0.5,               // Seconds (default: 0.5)
-  syncIntervalMs: 5000                  // Milliseconds (default: 5000)
+  publishKey: 'pub-c-YOUR-PUBLISH-KEY',
+  subscribeKey: 'sub-c-YOUR-SUBSCRIBE-KEY',
+  userId: 'user-123',              // Optional: auto-generated if omitted
+  maxDriftThreshold: 0.5,          // Seconds before force-sync (default: 0.5)
+  syncIntervalMs: 5000             // Sync pulse interval (default: 5000)
 });
 
-// Connect to a sync room
-syncManager.connect('my-watch-party');
+// Join a watch party room
+syncManager.connect('friday-movie-night');
 
-// Become the master to control playback for everyone
+// Control playback for everyone (or stay as follower)
 syncManager.becomeMaster();
-
-// Or stay as follower to receive sync commands
-syncManager.becomeFollower();
 ```
 
-### SyncManager API
+---
+
+## 🔌 SyncManager API
 
 | Method | Description |
 |--------|-------------|
-| `connect(roomId)` | Join a sync room by ID |
-| `disconnect()` | Leave the current sync room |
-| `becomeMaster()` | Take control of playback for all clients |
-| `becomeFollower()` | Receive and apply sync commands |
+| `connect(roomId)` | Join a sync room |
+| `disconnect()` | Leave the current room |
+| `becomeMaster()` | Take control of playback for all viewers |
+| `becomeFollower()` | Follow the master's playback |
 | `getRole()` | Returns `'master'` or `'follower'` |
 | `isConnected()` | Returns connection status |
 | `getRoomId()` | Returns current room ID |
 | `getUserId()` | Returns this client's user ID |
-| `destroy()` | Clean up all resources |
+| `destroy()` | Clean up resources |
 
 ### Events
 
 ```javascript
-// Fired when another client claims master role
 syncManager.addEventListener('masterchanged', (event) => {
   console.log('New master:', event.newMasterId);
 });
 ```
 
-### Demo
+---
 
-Try the [Playback Sync Demo](demo/sync/) to see it in action.
+## 🎯 How Sync Works
 
-[PubNub]: https://www.pubnub.com/
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        PubNub Cloud                             │
+│                    (Real-Time Messaging)                        │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+        ▼                   ▼                   ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│   MASTER 👑   │   │  FOLLOWER 1   │   │  FOLLOWER 2   │
+│               │   │               │   │               │
+│ Play/Pause →──┼───┼──→ Receives ──┼───┼──→ Receives   │
+│ Seek →────────┼───┼──→ Receives ──┼───┼──→ Receives   │
+│ Sync Pulse →──┼───┼──→ Adjusts ───┼───┼──→ Adjusts    │
+└───────────────┘   └───────────────┘   └───────────────┘
+```
 
+1. **Master** controls playback (play, pause, seek)
+2. Commands are sent instantly via **PubNub** to all connected clients
+3. **Followers** receive and apply commands with latency compensation
+4. **Periodic sync pulses** correct any drift between clients
 
-## Builds
+---
 
-Shaka currently provides the following versions:
-- Complete build with UI (`shaka-player.ui.js`)
-- Complete build without UI (`shaka-player.compiled.js`)
-- DASH build without UI, Cast and Offline (`shaka-player.dash.js`)
-- HLS build without UI, Cast and Offline (`shaka-player.hls.js`)
+## 📦 Included Builds
 
+| Build | File | Use Case |
+|-------|------|----------|
+| **Full + UI** | `shaka-player.ui.js` | Complete player with UI controls |
+| **Full** | `shaka-player.compiled.js` | Player without UI |
+| **DASH Only** | `shaka-player.dash.js` | Lightweight DASH-only build |
+| **HLS Only** | `shaka-player.hls.js` | Lightweight HLS-only build |
 
-## Documentation & Important Links ##
+All builds include the **SyncManager** for Watch Party functionality.
 
- * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
- * [Nightly Demo](https://shaka-project.github.io/shaka-player/)
- * [Demo index](https://index-dot-shaka-player-demo.appspot.com)
- * [API documentation](https://shaka-project.github.io/shaka-player/docs/api/index.html)
- * [Tutorials](https://shaka-project.github.io/shaka-player/docs/api/tutorial-welcome.html)
- * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
- * [Hosted builds on jsDelivr](https://www.jsdelivr.com/package/npm/shaka-player)
- * [Development roadmap](roadmap.md)
- * Subscribe to releases by following
-     [instructions from this blog](https://www.jessesquires.com/blog/2020/07/30/github-tip-watching-releases/)
+---
 
+## 🎬 Full Shaka Player Features
 
-## FAQ ##
+This package includes **all features** from [Shaka Player](https://github.com/shaka-project/shaka-player):
 
-For general help and before filing any bugs, please read the
-[FAQ](docs/tutorials/faq.md).
+<details>
+<summary><b>📺 Streaming Formats</b></summary>
 
+- **DASH** - VOD, Live, In-Progress Recording
+- **HLS** - VOD, Live, Event, Low-Latency
+- Multi-period content
+- Multi-codec/container support
 
-## Contributing ##
+</details>
 
-If you have improvements or fixes, we would love to have your contributions.
-Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-for more information on the process we would like contributors to follow.
+<details>
+<summary><b>🔐 DRM Support</b></summary>
 
+| | Widevine | PlayReady | FairPlay | ClearKey |
+|:--:|:--:|:--:|:--:|:--:|
+| Chrome | ✅ | - | - | ✅ |
+| Firefox | ✅ | - | - | ✅ |
+| Edge | ✅ | ✅ | - | ✅ |
+| Safari | - | - | ✅ | - |
 
-## Framework Integrations ##
+</details>
 
-The Shaka team doesn't have the bandwidth and experience to provide guidance and
-support for integrating Shaka Player with specific frameworks, but some of our
-users have successfully done so and created tutorials to help other beginners.
+<details>
+<summary><b>📱 Platform Support</b></summary>
 
-Shaka + ReactJS Library
-- https://github.com/winoffrg/limeplay
+| Platform | Chrome | Firefox | Safari | Edge |
+|:---------|:------:|:-------:|:------:|:----:|
+| Windows | ✅ | ✅ | - | ✅ |
+| macOS | ✅ | ✅ | ✅ | ✅ |
+| Linux | ✅ | ✅ | - | ✅ |
+| Android | ✅ | ✅ | - | - |
+| iOS | Native | Native | Native | - |
 
-Shaka + ReactJS integrations:
-- https://github.com/matvp91/shaka-player-react
-- https://github.com/amit08255/shaka-player-react-with-ui-config
+</details>
 
-Shaka + Next.js integration:
-- https://github.com/amit08255/shaka-player-react-with-ui-config/tree/master/nextjs-shaka-player
+<details>
+<summary><b>🎨 Additional Features</b></summary>
 
-Shaka + Vue.js integrations:
-- https://github.com/davidjamesherzog/shaka-player-vuejs
+- Offline storage & playback
+- Subtitles (WebVTT, TTML, CEA-608/708)
+- Thumbnails support
+- VR/360° video
+- Monetization with IMA SDK
+- Content Steering
 
-Shaka + Nuxt.js integration:
-- https://github.com/davidjamesherzog/shaka-player-nuxtjs
+</details>
 
-Shaka + video.js integration:
-- https://github.com/davidjamesherzog/videojs-shaka
+---
 
-Shaka + Angular integration:
-- https://github.com/PatrickKalkman/shaka-player-angular
+## 📖 Documentation
 
-If you have published Shaka Integration code/tutorials, please feel free to submit PRs
-to add them to this list, we will gladly approve!
+| Resource | Link |
+|----------|------|
+| **Watch Party Demo** | [demo/sync/](demo/sync/) |
+| **Full API Docs** | [shaka-project.github.io/shaka-player/docs/api](https://shaka-project.github.io/shaka-player/docs/api/index.html) |
+| **Tutorials** | [Shaka Tutorials](https://shaka-project.github.io/shaka-player/docs/api/tutorial-welcome.html) |
+| **PubNub Dashboard** | [admin.pubnub.com](https://admin.pubnub.com) |
+| **PubNub Docs** | [pubnub.com/docs](https://www.pubnub.com/docs) |
 
-## Maintained by ##
+---
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/ateme-logo-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/logos/ateme-logo-light.png">
-  <img alt="Ateme" src="docs/logos/ateme-logo-light.png" height="55">
-</picture>
-&nbsp;&nbsp;
-<picture>
-  <img alt="Google" src="docs/logos/google.png" height="55">
-</picture>
-&nbsp;&nbsp;
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/logos/paramout-logo-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/logos/paramout-logo-light.svg">
-  <img alt="Paramount" src="docs/logos/paramout-logo-light.svg" height="55">
-</picture>
+## 🤝 Contributing
+
+We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## 📄 License
+
+Apache 2.0 - See [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+### Built with ❤️ by
+
+<a href="https://www.pubnub.com">
+  <img src="https://www.pubnub.com/wp-content/uploads/2024/12/PubNub_Logo_RGB_Flame.svg" alt="PubNub" height="60">
+</a>
+
+**[PubNub](https://www.pubnub.com)** - The Real-Time Communication Platform
+
+<br>
+
+*Based on [Shaka Player](https://github.com/shaka-project/shaka-player) by Google*
+
+</div>
