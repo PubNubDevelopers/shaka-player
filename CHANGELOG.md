@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.1.1](https://github.com/PubNubDevelopers/shaka-player/compare/v5.1.0...v5.1.1) (2026-01-15)
+
+
+### Bug Fixes
+
+* README.md ([0964b0f](https://github.com/PubNubDevelopers/shaka-player/commit/0964b0f127219eae1ae2ac78a3a68fd2cbb05c75))
+* README.md ([20a4ffa](https://github.com/PubNubDevelopers/shaka-player/commit/20a4ffa7e13f0221ca1263c5cf2337cacc214184))
+* README.md ([37641a1](https://github.com/PubNubDevelopers/shaka-player/commit/37641a18dfe915b746db4e2a1c6e6d81fd1e30bd))
+
 ## [5.1.0](https://github.com/PubNubDevelopers/shaka-player/compare/v5.0.1...v5.1.0) (2026-01-11)
 
 
